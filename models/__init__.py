@@ -1,6 +1,12 @@
 #!/usr/bin/env python
 #-*- coding:utf-8 -*-
 
+"""
+auth: 用户、角色、权限（暂时不使用）
+
+
+"""
+
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 

@@ -1,8 +1,12 @@
 #!/usr/bin/env python
 #-*- coding:utf-8 -*-
 
+import os
 
-DATABASE_URL = 'sqlite:///resource/foo.db3'
+PROJECT_PATH = os.path.dirname(__file__)
+
+
+DATABASE_URL = 'sqlite:///%s/resource/foo.db3' % PROJECT_PATH
 DATABASE_SETTINGS = {
     'encoding': 'utf-8',
     'echo': False
