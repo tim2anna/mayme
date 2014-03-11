@@ -17,6 +17,10 @@ VERSION_STRING = '0.1.0'
 
 
 import models.auth
+import models.baseinfo
+import models.customer
+import models.purchase
+import models.sale
 
 try:
     from local_settings import *
