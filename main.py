@@ -1415,22 +1415,6 @@ class wxPythonDemo(wx.Frame):
 
         self.Centre(wx.BOTH)
 
-        self.statusBar = self.CreateStatusBar(2, wx.ST_SIZEGRIP)
-        self.statusBar.SetStatusWidths([-2, -1])
-
-        statusText = "Welcome to %s %s" % (settings.PROJECT_NAME, settings.VERSION_STRING)
-        self.statusBar.SetStatusText(statusText, 0)
-
-        self.downloadGauge = wx.Gauge(self.statusBar, -1, 50)
-        self.downloadGauge.SetToolTipString("Downloading Docs...")
-        self.downloadGauge.Hide()
-
-        self.sizeChanged = False
-        self.Reposition()
-
-        self.statusBar.Bind(wx.EVT_SIZE, self.OnStatusBarSize)
-        self.statusBar.Bind(wx.EVT_IDLE, self.OnStatusBarIdle)
-
         self.dying = False
         self.skipLoad = False
         self.allowAuiFloating = False
@@ -1452,8 +1436,6 @@ class wxPythonDemo(wx.Frame):
             imgList.Add(bmp)
 
         self.nb.AssignImageList(imgList)
-
-        self.BuildMenuBar()
 
         self.finddata = wx.FindReplaceData()
         self.finddata.SetFlags(wx.FR_DOWN)
@@ -1618,145 +1600,6 @@ class wxPythonDemo(wx.Frame):
             self.pickledData = {}
 
         fid.close()
-
-
-    def BuildMenuBar(self):
-
-        # Make a File menu
-        self.mainmenu = wx.MenuBar()
-        menu = wx.Menu()
-        item = menu.Append(-1, '&Redirect Output',
-                           'Redirect print statements to a window',
-                           wx.ITEM_CHECK)
-        self.Bind(wx.EVT_MENU, self.OnToggleRedirect, item)
-
-        wx.App.SetMacExitMenuItemId(9123)
-        exitItem = wx.MenuItem(menu, 9123, 'E&xit\tCtrl-Q', 'Get the heck outta here!')
-        exitItem.SetBitmap(images.catalog['exit'].GetBitmap())
-        menu.AppendItem(exitItem)
-        self.Bind(wx.EVT_MENU, self.OnFileExit, exitItem)
-        self.mainmenu.Append(menu, '&File')
-
-        # Make a Demo menu
-        menu = wx.Menu()
-        for indx, item in enumerate(_treeList[:-1]):
-            menuItem = wx.MenuItem(menu, -1, item[0])
-            submenu = wx.Menu()
-            for childItem in item[1]:
-                mi = submenu.Append(-1, childItem)
-                self.Bind(wx.EVT_MENU, self.OnDemoMenu, mi)
-            menuItem.SetBitmap(images.catalog[_demoPngs[indx + 1]].GetBitmap())
-            menuItem.SetSubMenu(submenu)
-            menu.AppendItem(menuItem)
-        self.mainmenu.Append(menu, '&Demo')
-
-        # Make an Option menu
-
-        menu = wx.Menu()
-        item = wx.MenuItem(menu, -1, 'Allow download of docs', 'Docs for window styles and events from the web',
-                           wx.ITEM_CHECK)
-        menu.AppendItem(item)
-        item.Check(self.allowDocs)
-        self.Bind(wx.EVT_MENU, self.OnAllowDownload, item)
-
-        item = wx.MenuItem(menu, -1, 'Delete saved docs', 'Deletes the cPickle file where docs are stored')
-        item.SetBitmap(images.catalog['deletedocs'].GetBitmap())
-        menu.AppendItem(item)
-        self.Bind(wx.EVT_MENU, self.OnDeleteDocs, item)
-
-        menu.AppendSeparator()
-        item = wx.MenuItem(menu, -1, 'Allow floating panes', 'Allows the demo panes to be floated using wxAUI',
-                           wx.ITEM_CHECK)
-        menu.AppendItem(item)
-        item.Check(self.allowAuiFloating)
-        self.Bind(wx.EVT_MENU, self.OnAllowAuiFloating, item)
-
-        auiPerspectives = self.auiConfigurations.keys()
-        auiPerspectives.sort()
-        perspectivesMenu = wx.Menu()
-        item = wx.MenuItem(perspectivesMenu, -1, DEFAULT_PERSPECTIVE, "Load startup default perspective", wx.ITEM_RADIO)
-        self.Bind(wx.EVT_MENU, self.OnAUIPerspectives, item)
-        perspectivesMenu.AppendItem(item)
-        for indx, key in enumerate(auiPerspectives):
-            if key == DEFAULT_PERSPECTIVE:
-                continue
-            item = wx.MenuItem(perspectivesMenu, -1, key, "Load user perspective %d" % indx, wx.ITEM_RADIO)
-            perspectivesMenu.AppendItem(item)
-            self.Bind(wx.EVT_MENU, self.OnAUIPerspectives, item)
-
-        menu.AppendMenu(wx.ID_ANY, "&AUI Perspectives", perspectivesMenu)
-        self.perspectives_menu = perspectivesMenu
-
-        item = wx.MenuItem(menu, -1, 'Save Perspective', 'Save AUI perspective')
-        item.SetBitmap(images.catalog['saveperspective'].GetBitmap())
-        menu.AppendItem(item)
-        self.Bind(wx.EVT_MENU, self.OnSavePerspective, item)
-
-        item = wx.MenuItem(menu, -1, 'Delete Perspective', 'Delete AUI perspective')
-        item.SetBitmap(images.catalog['deleteperspective'].GetBitmap())
-        menu.AppendItem(item)
-        self.Bind(wx.EVT_MENU, self.OnDeletePerspective, item)
-
-        menu.AppendSeparator()
-
-        item = wx.MenuItem(menu, -1, 'Restore Tree Expansion', 'Restore the initial tree expansion state')
-        item.SetBitmap(images.catalog['expansion'].GetBitmap())
-        menu.AppendItem(item)
-        self.Bind(wx.EVT_MENU, self.OnTreeExpansion, item)
-
-        self.mainmenu.Append(menu, '&Options')
-        self.options_menu = menu
-
-        # Make a Help menu
-        menu = wx.Menu()
-        findItem = wx.MenuItem(menu, -1, '&Find\tCtrl-F', 'Find in the Demo Code')
-        findItem.SetBitmap(images.catalog['find'].GetBitmap())
-        if 'wxMac' not in wx.PlatformInfo:
-            findNextItem = wx.MenuItem(menu, -1, 'Find &Next\tF3', 'Find Next')
-        else:
-            findNextItem = wx.MenuItem(menu, -1, 'Find &Next\tCtrl-G', 'Find Next')
-        findNextItem.SetBitmap(images.catalog['findnext'].GetBitmap())
-        menu.AppendItem(findItem)
-        menu.AppendItem(findNextItem)
-        menu.AppendSeparator()
-
-        shellItem = wx.MenuItem(menu, -1, 'Open Py&Shell Window\tF5',
-                                'An interactive interpreter window with the demo app and frame objects in the namesapce')
-        shellItem.SetBitmap(images.catalog['pyshell'].GetBitmap())
-        menu.AppendItem(shellItem)
-        inspToolItem = wx.MenuItem(menu, -1, 'Open &Widget Inspector\tF6',
-                                   'A tool that lets you browse the live widgets and sizers in an application')
-        inspToolItem.SetBitmap(images.catalog['inspect'].GetBitmap())
-        menu.AppendItem(inspToolItem)
-        if 'wxMac' not in wx.PlatformInfo:
-            menu.AppendSeparator()
-        helpItem = menu.Append(wx.ID_ABOUT, '&About wxPython Demo', 'wxPython RULES!!!')
-
-        self.Bind(wx.EVT_MENU, self.OnOpenShellWindow, shellItem)
-        self.Bind(wx.EVT_MENU, self.OnOpenWidgetInspector, inspToolItem)
-        self.Bind(wx.EVT_MENU, self.OnHelpAbout, helpItem)
-        self.Bind(wx.EVT_MENU, self.OnHelpFind, findItem)
-        self.Bind(wx.EVT_MENU, self.OnFindNext, findNextItem)
-        self.Bind(wx.EVT_FIND, self.OnFind)
-        self.Bind(wx.EVT_FIND_NEXT, self.OnFind)
-        self.Bind(wx.EVT_FIND_CLOSE, self.OnFindClose)
-        self.Bind(wx.EVT_UPDATE_UI, self.OnUpdateFindItems, findItem)
-        self.Bind(wx.EVT_UPDATE_UI, self.OnUpdateFindItems, findNextItem)
-        self.mainmenu.Append(menu, '&Help')
-        self.SetMenuBar(self.mainmenu)
-
-        self.EnableAUIMenu()
-
-        if False:
-            # This is another way to set Accelerators, in addition to
-            # using the '\t<key>' syntax in the menu items.
-            aTable = wx.AcceleratorTable([(wx.ACCEL_ALT, ord('X'), exitItem.GetId()),
-                                          (wx.ACCEL_CTRL, ord('H'), helpItem.GetId()),
-                                          (wx.ACCEL_CTRL, ord('F'), findItem.GetId()),
-                                          (wx.ACCEL_NORMAL, wx.WXK_F3, findNextItem.GetId()),
-                                          (wx.ACCEL_NORMAL, wx.WXK_F9, shellItem.GetId()),
-            ])
-            self.SetAcceleratorTable(aTable)
 
 
     #---------------------------------------------
@@ -2507,23 +2350,6 @@ class wxPythonDemo(wx.Frame):
     ##        wx.SafeYield()
 
     #---------------------------------------------
-
-    def ShowTip(self):
-        config = GetConfig()
-        showTipText = config.Read("tips")
-        if showTipText:
-            showTip, index = eval(showTipText)
-        else:
-            showTip, index = (1, 0)
-
-        if showTip:
-            tp = wx.CreateFileTipProvider(opj("data/tips.txt"), index)
-            showTip = wx.ShowTip(self, tp)
-            index = tp.GetCurrentTip()
-            config.Write("tips", str((showTip, index)))
-            config.Flush()
-
-    #---------------------------------------------
     def OnDemoMenu(self, event):
         try:
             selectedDemo = self.treeMap[self.mainmenu.GetLabel(event.GetId())]
@@ -2586,7 +2412,6 @@ class MySplashScreen(wx.SplashScreen):
         frame.Show()
         if self.fc.IsRunning():
             self.Raise()
-        wx.CallAfter(frame.ShowTip)
 
 
 #---------------------------------------------------------------------------
