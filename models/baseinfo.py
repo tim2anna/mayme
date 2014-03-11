@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 #-*- coding:utf-8 -*-
+
 """
 基础信息
 
 Product产品
     style_id 款号
-    color 颜色
     retail_price 零售价
     wholesale_price 批发价
     catetory 分类：针织、裤子、连衣裙、衬衫、外套、针织外套
@@ -29,3 +29,24 @@ Distribution产品配料
 
 单件成本 = 所用原料1单价 * 所用原料1数量 + 所用原料2单价 * 所用原料2数量 + ... + Attr Cost
 """
+
+
+from sqlalchemy import Column
+from sqlalchemy.types import Integer, Unicode
+
+import models
+
+
+class Product(models.Base):
+    """ 产品 """
+    __tablename__ = 'baseinfo_product'
+
+    id = Column(Integer, autoincrement=True, primary_key=True)
+    style_id = Column(Unicode(30), unique=True, nullable=False)  # 款号
+    retail_price = Column(Unicode(30))  # 零售价
+    wholesale_price = Column(Unicode(30))  # 批发价
+    catetory = Column(Unicode(30))  # 分类：针织、裤子、连衣裙、衬衫、外套、针织外套
+
+    # TODO: 一件产品的尺码，应该是和产品绑定的，不同产品的可选尺码是不同的
+    # TODO: 产品的颜色也同上
+
