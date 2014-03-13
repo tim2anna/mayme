@@ -6,7 +6,7 @@ import  images
 
 #----------------------------------------------------------------------
 
-class TestPanel(wx.Panel):
+class TreeListPanel(wx.Panel):
     def __init__(self, parent, log):
         self.log = log
         wx.Panel.__init__(self, parent, -1)
@@ -73,7 +73,7 @@ class TestPanel(wx.Panel):
 #----------------------------------------------------------------------
 
 def runTest(frame, nb, log):
-    win = TestPanel(nb, log)
+    win = TreeListPanel(nb, log)
     return win
 
 #----------------------------------------------------------------------
