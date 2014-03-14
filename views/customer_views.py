@@ -62,9 +62,8 @@ class CustomerModel(dv.PyDataViewIndexListModel):
 
 
 class CustomerPanel(wx.Panel):
-    def __init__(self, parent, model=None, data=None):
-        wx.Panel.__init__(self, parent, -1)
-
+    def __init__(self, parent, model=None, data=None, size=wx.Size(100, 100)):
+        wx.Panel.__init__(self, parent, -1, size=size)
         # Create a dataview control
         self.dvc = dv.DataViewCtrl(self,style=wx.BORDER_THEME | dv.DV_ROW_LINES | dv.DV_VERT_RULES | dv.DV_MULTIPLE)
 
@@ -92,20 +91,6 @@ class CustomerPanel(wx.Panel):
 
         self.Sizer = wx.BoxSizer(wx.VERTICAL)
         self.Sizer.Add(self.dvc, 1, wx.EXPAND)
-
-        # Add some buttons to help out with the tests
-        b1 = wx.Button(self, label=u"新窗口", name="newView")
-        self.Bind(wx.EVT_BUTTON, self.OnNewView, b1)
-        b2 = wx.Button(self, label=u"导入")
-        self.Bind(wx.EVT_BUTTON, self.OnAddRow, b2)
-        b3 = wx.Button(self, label=u"删除")
-        self.Bind(wx.EVT_BUTTON, self.OnDeleteRows, b3)
-
-        btnbox = wx.BoxSizer(wx.HORIZONTAL)
-        btnbox.Add(b1, 0, wx.LEFT|wx.RIGHT, 5)
-        btnbox.Add(b2, 0, wx.LEFT|wx.RIGHT, 5)
-        btnbox.Add(b3, 0, wx.LEFT|wx.RIGHT, 5)
-        self.Sizer.Add(btnbox, 0, wx.TOP|wx.BOTTOM, 5)
 
         # Bind some events so we can see what the DVC sends us
         self.Bind(dv.EVT_DATAVIEW_ITEM_EDITING_DONE, self.OnEditingDone, self.dvc)
