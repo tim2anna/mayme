@@ -26,3 +26,9 @@ try:
     from local_settings import *
 except Exception:
     pass
+
+from sqlalchemy import create_engine
+import models
+engine = create_engine(DATABASE_URL, **DATABASE_SETTINGS)
+session = models.DBSession()
+models.init_model(engine)

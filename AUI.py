@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 #-*- coding:utf-8 -*-
 
+from settings import session
 import os
 import sys
 
@@ -22,8 +23,7 @@ except ImportError: # if it's not there locally, try the wxPython lib.
     import wx.lib.agw.aui as aui
     from wx.lib.agw.aui import aui_switcherdialog as ASD
 
-import images
-
+from views import images
 from views.py_images import *
 #----------------------------------------------------------------------
 
@@ -197,24 +197,24 @@ class AuiFrame(wx.Frame):
         self.SetMinSize(wx.Size(800, 600))  # 设置最小的尺寸
 
         # add a bunch of panes
-        self._mgr.AddPane(self.CreateTreeCtrl(), aui.AuiPaneInfo().
-                          Name("autonotebook").Caption(u"原料").
+        self._mgr.AddPane(self.CreateMaterialPanel(), aui.AuiPaneInfo().
+                          Name("material_panel").Caption(u"原料").
                           Bottom().Layer(1).Position(1).MinimizeButton(True).MaximizeButton(True).CloseButton(False))
 
         self._mgr.AddPane(self.CreateCutomerPanel(), aui.AuiPaneInfo().
                           Name("cutomer_panel").Caption(u"客户").
                           Bottom().MinimizeButton(True).MaximizeButton(True).CloseButton(False),
-                          target=self._mgr.GetPane("autonotebook"))
+                          target=self._mgr.GetPane("material_panel"))
 
         self._mgr.AddPane(self.CreateCutomerPanel(), aui.AuiPaneInfo().
                           Name("cutomer_panel2").Caption(u"产品").
                           Bottom().MinimizeButton(True).MaximizeButton(True).CloseButton(False),
-                          target=self._mgr.GetPane("autonotebook"))
+                          target=self._mgr.GetPane("material_panel"))
 
         self._mgr.AddPane(self.CreateTreeCtrl(), aui.AuiPaneInfo().
                           Name("thirdauto").Caption(u"订单").
                           Bottom().MinimizeButton(True).MaximizeButton(True).CloseButton(False),
-                          target=self._mgr.GetPane("autonotebook"))
+                          target=self._mgr.GetPane("material_panel"))
 
         # 创建中间面板
         self._mgr.AddPane(self.CreateHTMLCtrl(), aui.AuiPaneInfo().Name("html_content").CenterPane())
@@ -281,7 +281,16 @@ class AuiFrame(wx.Frame):
 
     def CreateCutomerPanel(self):
         from views.customer_views import CustomerPanel
-        ctrl = CustomerPanel(parent=self, data=[])
+        from models.customer import Customer
+        data = [[getattr(row, col.name, '') for col in Customer.__table__.columns] for row in session.query(Customer).all()]
+        ctrl = CustomerPanel(parent=self, data=data)
+        return ctrl
+
+    def CreateMaterialPanel(self):
+        from views.material_views import MaterialPanel
+        from models.baseinfo import Material
+        data = [[getattr(row, col.name, '') for col in Material.__table__.columns] for row in session.query(Material).all()]
+        ctrl = MaterialPanel(parent=self, data=data)
         return ctrl
 
 

@@ -6,8 +6,10 @@
 import wx
 import wx.dataview as dv
 
+from settings import session
+from models.baseinfo import Material
 
-class CustomerModel(dv.PyDataViewIndexListModel):
+class MaterialModel(dv.PyDataViewIndexListModel):
     def __init__(self, data):
         dv.PyDataViewIndexListModel.__init__(self, len(data))
         self.data = data
@@ -61,23 +63,30 @@ class CustomerModel(dv.PyDataViewIndexListModel):
         self.RowAppended()  # notify views
 
 
-class CustomerPanel(wx.Panel):
-    def __init__(self, parent, model=None, data=None, size=wx.Size(100, 100)):
+class MaterialPanel(wx.Panel):
+    def __init__(self, parent, model=None, data=None, size=wx.Size(100, 160)):
         wx.Panel.__init__(self, parent, -1, size=size)
         # Create a dataview control
         self.dvc = dv.DataViewCtrl(self,style=wx.BORDER_THEME | dv.DV_ROW_LINES | dv.DV_VERT_RULES | dv.DV_MULTIPLE)
 
         # Create an instance of our simple model...
         if model is None:
-            self.model = CustomerModel(data)
+            self.model = MaterialModel(data)
         else:
             self.model = model
 
         self.dvc.AssociateModel(self.model)
 
-        self.dvc.AppendTextColumn(u"客户名",  1, width=150, mode=dv.DATAVIEW_CELL_EDITABLE)
-        self.dvc.AppendTextColumn(u"电话",   2, width=200, mode=dv.DATAVIEW_CELL_EDITABLE)
-        self.dvc.AppendTextColumn(u"地区",   3, width=250,  mode=dv.DATAVIEW_CELL_EDITABLE)
+        self.dvc.AppendTextColumn(u"款号",  1, width=150, mode=dv.DATAVIEW_CELL_EDITABLE)
+        self.dvc.AppendTextColumn(u"零售价",   2, width=50, mode=dv.DATAVIEW_CELL_EDITABLE)
+        self.dvc.AppendTextColumn(u"批发价",   3, width=50,  mode=dv.DATAVIEW_CELL_EDITABLE)
+        self.dvc.AppendTextColumn(u"分类",   4, width=50,  mode=dv.DATAVIEW_CELL_EDITABLE)
+
+        col = 5
+        for mat in session.query(Material).all():
+            self.dvc.AppendTextColumn(mat.name, col, width=50, mode=dv.DATAVIEW_CELL_EDITABLE)
+            col += 1
+
 
         c0 = self.dvc.PrependTextColumn("ID", 0, width=40)
         c0.Alignment = wx.ALIGN_RIGHT
@@ -135,10 +144,18 @@ class App(wx.App):
     def OnInit(self):
         self.frame = wx.Frame(parent=None, id=-1, size=(970, 720))  # 框架的实例作为应用程序的一个属性
 
-        from settings import session
-        from models.customer import Customer
-        data = [[getattr(row, col.name, '') for col in Customer.__table__.columns] for row in session.query(Customer).all()]
-        self.panel = CustomerPanel(parent=self.frame, data=data)
+        # mat = session.query(Material).all()[0]
+        # from models.baseinfo import Product, Distribution
+        # d = Distribution(qty=10)
+        # product = Product(style_id='KI001')
+        # d.products = product
+        # mat.product_dists.append(d)
+        #
+        # session.add(product)s
+        # session.commit()
+
+        data = [[getattr(row, col.name, '') for col in Material.__table__.columns] for row in session.query(s).all()]
+        self.panel = MaterialPanel(parent=self.frame, data=data)
         self.frame.Show()
         self.SetTopWindow(self.frame)  # 一个应用程序可以多个框架，设置顶级窗口
         return True

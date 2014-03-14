@@ -77,6 +77,6 @@ class Material(models.Base):
 
     id = Column(Integer, autoincrement=True, primary_key=True)
     name = Column(Unicode(30), unique=True, nullable=False)  # 名称
-    unit = Column(Unicode(30))  # 单位
     unit_cost = Column(Float)  # 单价
+    unit = Column(Unicode(30))  # 单位
     catetory = Column(Unicode(30))  # 分类：主料、辅料
