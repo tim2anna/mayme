@@ -3,14 +3,17 @@
 
 import wx
 import os
+from datetime import datetime
 import wx.lib.filebrowsebutton as filebrowse
+
+from xls.read import read
 
 
 class MyPanel(wx.Panel):
     def __init__(self, parent, ID):
         wx.Panel.__init__(self, parent, ID)
 
-        current_path = os.path.dirname(__file__)
+        current_path = os.getcwd()
         self.source_path = current_path
         self.output_path = current_path
 
@@ -20,17 +23,20 @@ class MyPanel(wx.Panel):
             labelText=u'源文件夹   ', buttonText=u'浏览', dialogTitle=u'选择源文件夹',
             startDirectory=current_path
         )
+        source.SetValue(self.source_path)
+
         output = filebrowse.DirBrowseButton(
             self, -1, size=(450, -1), changeCallback = self.outputCallback,
             labelText=u'输出文件夹', buttonText=u'浏览', dialogTitle=u'选择输出文件夹',
             startDirectory=current_path
         )
+        output.SetValue(self.output_path)
 
-        ok_btn = wx.Button(self, -1, u"确定")
+        self.ok_btn = ok_btn = wx.Button(self, -1, u"确定")
 
         log_panel = wx.Panel(self, -1)
         log_txt = wx.StaticText(log_panel, -1, u"日志", pos=(0, 10))
-        log_ctrl = wx.TextCtrl(log_panel, -1, "", pos=(65, 10), size=(300, 250), style=wx.TE_MULTILINE|wx.TE_PROCESS_ENTER)
+        self.log_ctrl = log_ctrl = wx.TextCtrl(log_panel, -1, "", pos=(65, 10), size=(360, 250), style=wx.TE_MULTILINE|wx.TE_PROCESS_ENTER)
 
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(source, 0, wx.ALL, 5)
@@ -41,12 +47,25 @@ class MyPanel(wx.Panel):
         box.Add(sizer, 0, wx.ALL, 20)
         self.SetSizer(box)
 
+        self.Bind(wx.EVT_BUTTON, self.OnClick, ok_btn)
+
     def sourceCallback(self, evt):
         self.source_path = evt.GetString()
 
 
     def outputCallback(self, evt):
         self.output_path = evt.GetString()
+
+
+    def OnClick(self, evt):
+        self.ok_btn.Enable(False)
+        now = datetime.now().strftime('%Y-%m-%d %H-%M-%S')
+        output_dir = os.path.join(self.output_path, now)
+        os.mkdir(output_dir)
+        logs = read(self.source_path, output_dir)
+        for t, log in logs:
+            self.log_ctrl.AppendText(t + '\t' + log + '\n')
+        self.ok_btn.Enable(True)
 
 
 class App(wx.App):

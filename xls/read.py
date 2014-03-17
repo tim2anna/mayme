@@ -15,7 +15,10 @@
 """
 
 import os
+from datetime import datetime
 import xlrd
+
+from xls.write import gen_all_order_excel
 
 order_cols = [
     (u'款号', 'style'),
@@ -49,7 +52,22 @@ def is_using_sheet(sheet, cols):
             return False
     return True
 
-def read(source_dir):
+
+def process_sheet(sheet, cols):
+    name_dict = dict(cols)
+    col_dict = {}
+    for col, name in enumerate(sheet.row_values(0)):
+        if isinstance(name, basestring) and name.strip() in name_dict:
+            col_dict[name_dict[name.strip()]] = col
+    data = []
+    if sheet.nrows < 2: return data
+    for row in range(1, sheet.nrows):
+        values = sheet.row_values(row)
+        data.append(dict([(name_en, values[col]) for name_en, col in col_dict.items()]))
+    return data
+
+
+def read(source_dir, output_dir):
     """
     读取源数据文件夹里的数据文件
     """
@@ -66,33 +84,39 @@ def read(source_dir):
                 if is_using_sheet(sheet, order_cols):
                     order_sheet.append(sheet)
                 elif is_using_sheet(sheet, material_cols):
-                    material_cols.append(sheet)
+                    material_sheet.append(sheet)
 
     # 数据文件缺失不能处理
     if not order_sheet:
-        logs.append(u'缺失订单Excel文件，请检查订单Excel的列头信息')
-        return
-    if not order_sheet:
-        logs.append(u'缺失产品用料成本Excel文件，请检查产品用料成本Excel的列头信息')
-        return
+        logs.append((
+            datetime.now().strftime('%H:%M:%S'),
+            u'缺失订单Excel文件，请检查订单Excel的列头信息'
+        ))
+        return logs
+    if not material_sheet:
+        logs.append((
+            datetime.now().strftime('%H:%M:%S'),
+            u'缺失产品用料成本Excel文件，请检查产品用料成本Excel的列头信息'
+        ))
+        return logs
 
     order_data = []
     for sheet in order_sheet:
-        data = process_order_sheet(sheet)
-        order_data.append(data)
+        data = process_sheet(sheet, order_cols)
+        order_data.extend(data)
+    log = gen_all_order_excel(order_data, output_dir)
+    logs.append((
+        datetime.now().strftime('%H:%M:%S'),
+        log
+    ))
 
     material_data = []
     for sheet in material_sheet:
-        data = process_material_sheet(sheet)
-        material_data.append(data)
+        data = process_sheet(sheet, material_cols)
+        material_data.extend(data)
+    print material_data
 
-
-def process_order_sheet(sheet):
-    print sheet
-
-
-def process_material_sheet(sheet):
-    pass
+    return logs
 
 
 if __name__ == '__main__':

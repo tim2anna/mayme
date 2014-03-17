@@ -8,3 +8,5 @@
 *.db
 *.db3
 /local_settings.py
+/build
+/dist
