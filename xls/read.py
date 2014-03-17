@@ -120,6 +120,7 @@ def read(source_dir, output_dir):
 
 
 if __name__ == '__main__':
-    read(os.path.dirname(__file__))
+    default_dir = os.path.join(os.getcwd(), '..')
+    read(default_dir, default_dir)
 
 
