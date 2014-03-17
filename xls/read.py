@@ -121,7 +121,8 @@ def read(source_dir, output_dir):
 
 
 if __name__ == '__main__':
-    default_dir = os.path.join(os.getcwd(), '..')
-    read(default_dir, default_dir)
+    source_dir = os.path.join(os.getcwd(), '..', 'resource')
+    output_dir = os.path.join(os.getcwd(), '..')
+    read(source_dir, output_dir)
 
 
