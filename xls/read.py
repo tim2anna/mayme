@@ -31,7 +31,6 @@ order_cols = [
     (u'3XL', '3xl_size'),
     (u'4XL', '4xl_size'),
     (u'5XL', '5xl_size'),
-    (u'模式', 'mode'),
 ]
 
 material_cols = [
@@ -63,7 +62,9 @@ def process_sheet(sheet, cols):
     if sheet.nrows < 2: return data
     for row in range(1, sheet.nrows):
         values = sheet.row_values(row)
-        data.append(dict([(name_en, values[col]) for name_en, col in col_dict.items()]))
+        item = dict([(name_en, values[col]) for name_en, col in col_dict.items()])
+        if item['style'] and item['color']:  # 款式和颜色不能为空
+            data.append(item)
     return data
 
 
