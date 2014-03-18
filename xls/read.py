@@ -77,7 +77,7 @@ def read(source_dir, output_dir):
     # 读取文件，根据列头信息判断是否是所需sheet
     for root, dirs, files in os.walk(source_dir):
         for file in files:
-            if os.path.splitext(file)[1] != '.xls': continue
+            if os.path.splitext(file)[1] not in ['.xls', '.xlsx']: continue
             xls_file = os.path.join(root, file)
             book = xlrd.open_workbook(xls_file)
             for i in range(book.nsheets):
@@ -124,7 +124,7 @@ def read(source_dir, output_dir):
 
 
 if __name__ == '__main__':
-    source_dir = os.path.join(os.getcwd(), '..', 'resource')
+    source_dir = os.path.join(os.getcwd(), '..', 'demo_source')
     output_dir = os.path.join(os.getcwd(), '..')
     read(source_dir, output_dir)
 

@@ -175,13 +175,30 @@ def gen_material_sta_excel(material_data, order_data, output_dir):
         mat_data = []
         for style, color_dict in style_dict.items():
             row = [style]
+            style_cnt_total = 0
             for color in cols:
                 if color in color_dict:
-                    row.append(color_dict[color]['cnt'])  # 算总量
+                    try:
+                        unit_cnt = float(color_dict[color]['cnt'])
+                    except:
+                        unit_cnt = 0
+                    size_cnt_dict = order_dict.get(style, {}).get(color, {})
+                    s_size_cnt = size_cnt_dict.get('s_size', 0)
+                    m_size_cnt = size_cnt_dict.get('m_size', 0)
+                    l_size_cnt = size_cnt_dict.get('l_size', 0)
+                    xl_size_cnt = size_cnt_dict.get('xl_size', 0)
+                    xl2_size_cnt = size_cnt_dict.get('2xl_size', 0)
+                    xl3_size_cnt = size_cnt_dict.get('3xl_size', 0)
+                    xl4_size_cnt = size_cnt_dict.get('4xl_size', 0)
+                    xl5_size_cnt = size_cnt_dict.get('5xl_size', 0)
+                    color_cnt_total = unit_cnt * (s_size_cnt + m_size_cnt + l_size_cnt + xl_size_cnt + xl2_size_cnt + xl3_size_cnt + xl4_size_cnt + xl5_size_cnt)
+                    row.append(color_cnt_total)
+                    style_cnt_total += color_cnt_total
                 else:  # 该款式没有使用此颜色的布料
                     row.append('/')
+            row.append(style_cnt_total)
             mat_data.append(row)
-        book = write_sheet(book, material, [u'款式'] + cols, mat_data)
+        book = write_sheet(book, material, [u'款式'] + cols + [u'合计'], mat_data)
 
     book.save(os.path.join(output_dir, u'原料用量汇总.xls'))
     return u'已生成文件：' + os.path.join(output_dir, u'原料用量汇总.xls')
