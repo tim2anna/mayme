@@ -16,7 +16,7 @@ class MyPanel(wx.Panel):
         wx.Panel.__init__(self, parent, ID)
 
         current_path = os.getcwd()
-        self.source_path = current_path
+        self.source_path = os.path.join(current_path, 'demo_source')
         self.output_path = current_path
 
 
@@ -34,17 +34,17 @@ class MyPanel(wx.Panel):
         )
         output.SetValue(self.output_path)
 
-        self.ok_btn = ok_btn = wx.Button(self, -1, u"确定")
+        btn_panel = wx.Panel(self, -1)
+        log_txt = wx.StaticText(btn_panel, -1, u"日志", pos=(0, 10))
+        self.ok_btn = ok_btn = wx.Button(btn_panel, -1, u"确定", pos=(342, 0))
 
-        log_panel = wx.Panel(self, -1)
-        log_txt = wx.StaticText(log_panel, -1, u"日志", pos=(0, 10))
-        self.log_ctrl = log_ctrl = wx.TextCtrl(log_panel, -1, "", pos=(65, 10), size=(360, 250), style=wx.TE_MULTILINE|wx.TE_PROCESS_ENTER)
+        self.log_ctrl = log_ctrl = wx.TextCtrl(self, -1, "", pos=(65, 10), size=(430, 280), style=wx.TE_MULTILINE|wx.TE_PROCESS_ENTER)
 
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(source, 0, wx.ALL, 5)
         sizer.Add(output, 0, wx.ALL, 5)
-        sizer.Add(ok_btn, 0, wx.ALL, 5)
-        sizer.Add(log_panel, 0, wx.ALL, 5)
+        sizer.Add(btn_panel, 0, wx.ALL, 5)
+        sizer.Add(log_ctrl, 0, wx.ALL, 5)
         box = wx.BoxSizer()
         box.Add(sizer, 0, wx.ALL, 20)
         self.SetSizer(box)
@@ -60,6 +60,15 @@ class MyPanel(wx.Panel):
 
 
     def OnClick(self, evt):
+        if self.source_path in self.output_path:
+            dlg = wx.MessageDialog(self, u'源文件夹不能包含输出文件夹，否则会影响结果',
+                                   u'提示',
+                                   wx.OK | wx.ICON_INFORMATION
+                                   )
+            dlg.ShowModal()
+            dlg.Destroy()
+            return
+
         self.ok_btn.Enable(False)
         now = datetime.now().strftime('%Y-%m-%d %H-%M-%S')
         output_dir = os.path.join(self.output_path, now)
@@ -125,8 +134,12 @@ class App(wx.App, wx.lib.mixins.inspection.InspectionMixin):
         self.InitInspection()
         wx.SystemOptions.SetOptionInt("mac.window-plain-transition", 1)
         self.SetAppName("MayMe")
-        splash = MySplashScreen()
-        splash.Show()
+        self.frame = wx.Frame(parent=None, id=-1, size=(500, 500), title='MayMe')  # 框架的实例作为应用程序的一个属性
+        self.panel = MyPanel(self.frame, -1)
+        self.frame.Center()
+        self.frame.Show()
+        icon = WXPdemo.GetIcon()
+        self.frame.SetIcon(icon)
         return True
 
 

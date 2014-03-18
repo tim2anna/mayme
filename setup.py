@@ -12,6 +12,6 @@ setup(
     zipfile=None,
     windows=[{'script': 'MayMe.py'}],
     data_files=[
-        ("resource", ["resource/splash.png"]),
+        ("demo_source", ["demo_source/beijing.xls", "demo_source/hunan.xls", "demo_source/material.xls"]),
     ],
 )

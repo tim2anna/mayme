@@ -65,7 +65,7 @@ def gen_all_order_excel(order_data, output_dir):
         (u'合计', 'color_total'),
     ]
 
-    all_dict, mode_dict = {}, {}
+    all_dict = {}
     for item in order_data:
         if item['style'] not in all_dict: all_dict[item['style']] = {}
         if item['color'] not in all_dict[item['style']]: all_dict[item['style']][item['color']] = {
@@ -137,3 +137,51 @@ def gen_all_order_excel(order_data, output_dir):
     book.save(os.path.join(output_dir, u'汇总订单.xls'))
 
     return u'已生成文件：' + os.path.join(output_dir, u'汇总订单.xls')
+
+
+def gen_material_sta_excel(material_data, order_data, output_dir):
+    # 统计所有订单
+    order_dict = {}
+    for item in order_data:
+        if item['style'] not in order_dict: order_dict[item['style']] = {}
+        if item['color'] not in order_dict[item['style']]: order_dict[item['style']][item['color']] = {
+            's_size': 0, 'm_size': 0, 'l_size': 0, 'xl_size': 0, '2xl_size': 0, '3xl_size': 0, '4xl_size': 0, '5xl_size': 0
+        }
+        order_dict[item['style']][item['color']]['s_size'] += item['s_size'] if item['s_size'] else 0
+        order_dict[item['style']][item['color']]['m_size'] += item['m_size'] if item['m_size'] else 0
+        order_dict[item['style']][item['color']]['l_size'] += item['l_size'] if item['l_size'] else 0
+        order_dict[item['style']][item['color']]['xl_size'] += item['xl_size'] if item['xl_size'] else 0
+        order_dict[item['style']][item['color']]['2xl_size'] += item['2xl_size'] if item['2xl_size'] else 0
+        order_dict[item['style']][item['color']]['3xl_size'] += item['3xl_size'] if item['3xl_size'] else 0
+        order_dict[item['style']][item['color']]['4xl_size'] += item['4xl_size'] if item['4xl_size'] else 0
+        order_dict[item['style']][item['color']]['5xl_size'] += item['5xl_size'] if item['5xl_size'] else 0
+
+    material_dict = {}
+    for item in material_data:
+        if item['material'] not in material_dict:
+            material_dict[item['material']] = {'colors': set(), 'styles': {}}
+        if item['style'] not in material_dict[item['material']]['styles']:
+            material_dict[item['material']]['styles'][item['style']] = {}
+        material_dict[item['material']]['styles'][item['style']][item['color']] = {
+            'cnt': item['cnt'] if item['cnt'] else 0, 'unit_price': item['unit_price'], 'unit': item['unit']
+        }
+        material_dict[item['material']]['colors'].add(item['color'])
+
+    book = xlwt.Workbook()
+
+    for material, mat_dict in material_dict.items():
+        cols = list(mat_dict['colors'])
+        style_dict = mat_dict['styles']
+        mat_data = []
+        for style, color_dict in style_dict.items():
+            row = [style]
+            for color in cols:
+                if color in color_dict:
+                    row.append(color_dict[color]['cnt'])  # 算总量
+                else:  # 该款式没有使用此颜色的布料
+                    row.append('/')
+            mat_data.append(row)
+        book = write_sheet(book, material, [u'款式'] + cols, mat_data)
+
+    book.save(os.path.join(output_dir, u'原料用量汇总.xls'))
+    return u'已生成文件：' + os.path.join(output_dir, u'原料用量汇总.xls')

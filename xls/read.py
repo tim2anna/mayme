@@ -18,7 +18,7 @@ import os
 from datetime import datetime
 import xlrd
 
-from xls.write import gen_all_order_excel
+from xls.write import gen_all_order_excel, gen_material_sta_excel
 
 order_cols = [
     (u'款号', 'style'),
@@ -115,8 +115,11 @@ def read(source_dir, output_dir):
     for sheet in material_sheet:
         data = process_sheet(sheet, material_cols)
         material_data.extend(data)
-    print material_data
-
+    log = gen_material_sta_excel(material_data, order_data, output_dir)
+    logs.append((
+        datetime.now().strftime('%H:%M:%S'),
+        log
+    ))
     return logs
 
 
