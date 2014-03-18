@@ -6,6 +6,26 @@
 import os
 import xlwt
 
+title_style = xlwt.easyxf(
+    'font: bold 1, name Tahoma, height 160, color white;'
+    'align: vertical center, horizontal center, wrap on;'
+    'borders: left thin, right thin, top thin, bottom thin;'
+    'pattern: pattern solid, pattern_fore_colour ocean_blue, pattern_back_colour ocean_blue'
+)
+
+common_style = xlwt.easyxf(
+    'font: name Tahoma, height 180;'
+    'align: vertical center, horizontal center, wrap on;'
+    'borders: left thin, right thin, top thin, bottom thin;'
+)
+
+odd_style = xlwt.easyxf(
+    'font: name Tahoma, height 180;'
+    'align: vertical center, horizontal center, wrap on;'
+    'borders: left thin, right thin, top thin, bottom thin;'
+    'pattern: pattern solid, pattern_fore_colour gray25, pattern_back_colour gray25'
+)
+
 
 def write_excel(cols, data, file_path, sheet_name='sheet'):
     book = xlwt.Workbook()
@@ -15,7 +35,7 @@ def write_excel(cols, data, file_path, sheet_name='sheet'):
         sheet_data = data[i*sheet_size:(i+1)*sheet_size]
         sheet = book.add_sheet(sheet_name if i is 0 else sheet_name+str(i+1))
         for m, col_name in enumerate(cols):
-            sheet.row(0).write(m, col_name)
+            sheet.row(0).write(m, col_name, title_style)
         for row, row_values in enumerate(sheet_data):
             for m, value in enumerate(row_values):
                 sheet.row(row+1).write(m, value)
@@ -29,23 +49,25 @@ def write_sheet(book, sheet_name, cols, data):
         sheet_data = data[i*sheet_size:(i+1)*sheet_size]
         sheet = book.add_sheet(sheet_name if i is 0 else sheet_name+str(i+1))
         for m, col_name in enumerate(cols):
-            sheet.row(0).write(m, col_name)
+            sheet.row(0).write(m, col_name, title_style)
         for row, row_values in enumerate(sheet_data):
             for m, value in enumerate(row_values):
-                sheet.row(row+1).write(m, value)
+                sheet.row(row+1).write(m, value, common_style if (row+1) % 2 == 0 else odd_style)
     return book
 
 
 def write_cell(book, sheet_name, cols, data):
     # TODO: 65535行的限制
     sheet = book.add_sheet(sheet_name)
+    sheet.row(0).height_mismatch = 1
+    sheet.row(0).height = 400
     for m, col_name in enumerate(cols):
-        sheet.row(0).write(m, col_name)
+        sheet.row(0).write(m, col_name, title_style)
     for cell in data:
         if cell['r1'] == cell['r2'] and cell['c1'] == cell['c2']:
-            sheet.row(cell['r1']).write(cell['c1'], cell['value'])
+            sheet.row(cell['r1']).write(cell['c1'], cell['value'], common_style if cell['r1'] % 2 == 0 else odd_style)
         else:
-            sheet.write_merge(cell['r1'], cell['r2'], cell['c1'], cell['c2'], cell['value'])
+            sheet.write_merge(cell['r1'], cell['r2'], cell['c1'], cell['c2'], cell['value'], common_style)
     return book
 
 def gen_all_order_excel(order_data, output_dir):
