@@ -87,20 +87,6 @@ def read(source_dir, output_dir):
                 elif is_using_sheet(sheet, material_cols):
                     material_sheet.append(sheet)
 
-    # 数据文件缺失不能处理
-    if not order_sheet:
-        logs.append((
-            datetime.now().strftime('%H:%M:%S'),
-            u'缺失订单Excel文件，请检查订单Excel的列头信息'
-        ))
-        return logs
-    if not material_sheet:
-        logs.append((
-            datetime.now().strftime('%H:%M:%S'),
-            u'缺失产品用料成本Excel文件，请检查产品用料成本Excel的列头信息'
-        ))
-        return logs
-
     order_data = []
     for sheet in order_sheet:
         data = process_sheet(sheet, order_cols)
